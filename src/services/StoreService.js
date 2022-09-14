@@ -6,7 +6,7 @@ import { rootReducer } from '../_redux/reducers/_rootReducer';
 
 const setup = () => {
   const middlewares = [thunk];
-  // const middleware = applyMiddleware(thunk);
+
   return createStore(
     rootReducer,
     composeWithDevTools(applyMiddleware(...middlewares))

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import AuthService from './AuthService';
+import * as Auth from './auth/utils';
 
 const HttpMethods = {
   GET: 'GET',
@@ -11,22 +11,22 @@ const _axios = axios.create();
 
 const configure = () => {
   _axios.interceptors.request.use((config) => {
-    if (AuthService.isLoggedIn()) {
-      const cb = () => {
-        config.headers.Authorization = `Bearer ${AuthService.getToken()}`;
-        return Promise.resolve(config);
-      };
-      return AuthService.updateToken(cb);
+    const iamToken = Auth.getIamToken();
+    if (iamToken && config?.headers) {
+      config.headers.Authorization = `Bearer ${iamToken}`;
+      // const cb = () => {
+      //   return Promise.resolve(config);
+      // };
+      // return AuthService.updateToken(cb);
+      console.log('HttpService', config);
+      return config;
     }
   });
 };
 
-const getAxiosClient = () => _axios;
-
 const HttpService = {
   HttpMethods,
-  configure,
-  getAxiosClient
+  configure
 };
 
 export default HttpService;

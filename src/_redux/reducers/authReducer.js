@@ -1,14 +1,15 @@
 import {
   AUTHENTICATED,
+  SET_SESSION_EXPIRED,
   AUTHENTICATION_ERROR,
-  SET_AUTHENTICATION_SESSION_EXPIRED
+  SET_IAM_TOKEN
 } from '../actions/authActions';
 
 const initialState = {
-  authenticated: false,
+  isAuthenticated: false,
   sessionExpired: false,
-  errorMsg: '',
-  userInfo: null
+  iamToken: false,
+  errorMsg: ''
 };
 
 const authReducer = (state = initialState, action) => {
@@ -16,14 +17,17 @@ const authReducer = (state = initialState, action) => {
     case AUTHENTICATED:
       return {
         ...state,
-        authenticated: action.payload
+        isAuthenticated: action.payload
       };
 
-    case AUTHENTICATION_ERROR:
-      return { ...state, errorMsg: action.payload };
-
-    case SET_AUTHENTICATION_SESSION_EXPIRED:
+    case SET_SESSION_EXPIRED:
       return { ...state, sessionExpired: action.payload };
+
+    case SET_IAM_TOKEN:
+      return { ...state, iamToken: action.payload };
+
+    case AUTHENTICATION_ERROR:
+      return { ...state, isAuthenticated: false, errorMsg: action.payload };
 
     default:
       return state;

@@ -1,7 +1,13 @@
+import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import AuthService from '../../services/AuthService';
+import { AuthService } from '../../services/auth';
 
 function NavBar({ isAuthenticated = false }) {
+  const handleLogout = useCallback(
+    async () => await AuthService.doLogout(),
+    []
+  );
+
   return (
     <>
       <nav>
@@ -23,7 +29,7 @@ function NavBar({ isAuthenticated = false }) {
           <button
             onClick={(e) => {
               e.preventDefault();
-              AuthService.doLogin();
+              // AuthService.doLogin();
             }}
           >
             Sign in
@@ -33,14 +39,7 @@ function NavBar({ isAuthenticated = false }) {
             <Link style={{ margin: 10 }} to="/profile">
               Profile
             </Link>
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                AuthService.doLogout();
-              }}
-            >
-              Sign out
-            </button>
+            <button onClick={handleLogout}>Sign out</button>
           </>
         )}
       </div>

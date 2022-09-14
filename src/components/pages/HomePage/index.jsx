@@ -1,7 +1,11 @@
 import MainLayout from '../../layout/MainLayout';
+import { useAuth } from '../../../services/auth';
+import ProjectList from './section/ProjectList';
 
 function HomePage() {
-  return <MainLayout>HomePage</MainLayout>;
+  const { isAuthenticated } = useAuth();
+
+  return <MainLayout>{isAuthenticated && <ProjectList />}</MainLayout>;
 }
 
 export default HomePage;
