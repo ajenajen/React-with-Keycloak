@@ -2,10 +2,14 @@ import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthService } from '../../services/auth';
 
-function NavBar({ isAuthenticated = false }) {
+function NavBar({ isAuthenticated = false, currentPathname }) {
+  const handleLogin = useCallback(
+    async () => AuthService.doLogin({ pathname: currentPathname }),
+    [currentPathname]
+  );
   const handleLogout = useCallback(
-    async () => await AuthService.doLogout(),
-    []
+    async () => AuthService.doLogout({ pathname: currentPathname }),
+    [currentPathname]
   );
 
   return (
@@ -14,8 +18,11 @@ function NavBar({ isAuthenticated = false }) {
         <Link style={{ margin: 10 }} to="/">
           Home
         </Link>
-        <Link style={{ margin: 10 }} to="/marketplace">
-          Marketplace
+        <Link style={{ margin: 10 }} to="/readmd">
+          Read .Md
+        </Link>
+        <Link style={{ margin: 10 }} to="/projects">
+          Projects
         </Link>
       </nav>
       <div
@@ -26,14 +33,7 @@ function NavBar({ isAuthenticated = false }) {
         }}
       >
         {!isAuthenticated ? (
-          <button
-            onClick={(e) => {
-              e.preventDefault();
-              // AuthService.doLogin();
-            }}
-          >
-            Sign in
-          </button>
+          <button onClick={handleLogin}>Sign in</button>
         ) : (
           <>
             <Link style={{ margin: 10 }} to="/profile">

@@ -3,6 +3,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import queryString from 'query-string';
 import jwt_decode from 'jwt-decode';
+
 import {
   ID_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
@@ -17,7 +18,7 @@ export function setIdToken(token) {
 }
 
 export function setRefreshToken(token) {
-  let date = new Date(Date.now());
+  let date = new Date(Date.now() + 25200000);
   date.setDate(date.getDate() + 7);
 
   Cookies.set(REFRESH_TOKEN_NAME, token, {
@@ -48,17 +49,17 @@ export function clearAllCookies() {
   Cookies.remove(IAM_TOKEN_NAME, { path: '' });
 }
 
-export function doLogin() {
+export function doLogin({ pathname = '/' }) {
   const queryParam = queryString.stringify({
     client_id: process.env.REACT_APP_CLIENT_ID,
-    redirect_uri: process.env.REACT_APP_CALLBACK_URL,
+    redirect_uri: `${process.env.REACT_APP_REDIRECT_URL}${pathname}`,
     scope: 'openid'
   });
 
   window.location.href = `${authorizationUrl}${queryParam}`;
 }
 
-export async function doLogout() {
+export async function doLogout({ pathname = '/' }) {
   const data = {
     client_id: process.env.REACT_APP_CLIENT_ID,
     client_secret: process.env.REACT_APP_CLIENT_SECRET,
@@ -78,17 +79,21 @@ export async function doLogout() {
     .then((response) => {
       clearAllCookies();
 
-      window.location.replace('/');
+      window.location.replace(pathname);
     })
     .catch((e) => console.error(e));
 }
 
-export async function accessTokenAuthentication(code = '') {
+export function handleAuthenticationCallback({ code, pathname }) {
+  accessTokenAuthentication({ code, pathname });
+}
+
+export async function accessTokenAuthentication({ code = '', pathname = '/' }) {
   const data = {
     grant_type: 'authorization_code',
     client_id: process.env.REACT_APP_CLIENT_ID,
     client_secret: process.env.REACT_APP_CLIENT_SECRET,
-    redirect_uri: process.env.REACT_APP_CALLBACK_URL,
+    redirect_uri: `${process.env.REACT_APP_REDIRECT_URL}${pathname}`,
     code
   };
 
@@ -115,7 +120,7 @@ export async function accessTokenAuthentication(code = '') {
             setIamToken(iamToken);
           })
           .then(() => {
-            window.location.replace(`/`);
+            window.location.replace(pathname);
           })
           .catch((e) => console.error(e));
       }
@@ -157,33 +162,78 @@ export async function iamTokenAuthentication(id_token) {
   }
 }
 
-export async function checkCookieAuthentication() {
+export function checkCookieAuthentication() {
+  let isCookieAuthentication = false;
   const idToken = getIdToken();
   const refreshToken = getRefreshToken();
-  const iamToken = getIamToken();
 
+  const noTokenCookies = idToken === undefined || refreshToken === undefined;
+
+  if (refreshToken === undefined) {
+    isCookieAuthentication = false;
+  }
   try {
-    if (refreshToken === undefined) {
-      doLogout();
-    } else if (idToken === undefined) {
-      console.log('idToken undefined go get idToken');
+    if (refreshToken !== undefined && idToken !== undefined) {
+      const decoded = jwt_decode(idToken);
 
-      doLogin();
-    } else {
-      if (idToken && iamToken) {
-        const decoded = jwt_decode(idToken);
-
-        if (Date.now() > decoded.exp * 1000) {
-          updateAuthorizationToken();
-        }
+      // console.log(
+      //   'Date.now() > decoded.exp * 1000',
+      //   Date.now() > decoded.exp * 1000
+      // );
+      if (Date.now() > decoded.exp * 1000) {
+        updateAuthorizationToken();
       }
+
+      isCookieAuthentication = true;
+    } else if (idToken === undefined || noTokenCookies) {
+      // await doLogout();
+      isCookieAuthentication = false;
     }
   } catch (error) {
     console.error(error);
+    isCookieAuthentication = false;
   }
+
+  return isCookieAuthentication;
 }
 
 export async function updateAuthorizationToken() {
-  const token = this.getRefreshToken;
-  this.setIdToken(token);
+  console.log('updateAuthorizationToken');
+  const data = {
+    client_id: process.env.REACT_APP_CLIENT_ID,
+    grant_type: 'refresh_token',
+    refresh_token: getRefreshToken()
+  };
+
+  const options = {
+    method: 'POST',
+    url: accessTokenUrl,
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    data: queryString.stringify(data)
+  };
+
+  await axios(options)
+    .then(async (response) => {
+      const { id_token, refresh_token } = response?.data;
+
+      setIdToken(id_token);
+      setRefreshToken(refresh_token);
+
+      if (id_token !== undefined) {
+        return await iamTokenAuthentication(id_token)
+          .then((response) => {
+            const { iamToken } = response;
+            setIamToken(iamToken);
+          })
+          .then(() => {
+            // window.location.replace(`/`);
+          })
+          .catch((e) => console.error(e));
+      }
+    })
+    .catch((e) => console.error(e));
+
+  // setIdToken(token);
 }

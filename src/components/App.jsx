@@ -3,23 +3,20 @@ import { useRoutes } from 'react-router-dom';
 import ProtectedRoute from './common/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
-import MarketplacePage from './pages/MarketplacePage';
-import AuthenticationCallback from './pages/Auth/Callback';
+import ProjectsPage from './pages/ProjectsPage';
+import ReadMdPage from './pages/ReadMdPage';
 import LogoutPage from './pages/Auth/LogoutPage';
+import ErrorPage from './pages/ErrorPage';
 
 const App = () => {
   const routes = useRoutes([
     {
-      path: '/*',
+      path: '/',
       element: <HomePage />
     },
     {
       path: '/logout',
       element: <LogoutPage />
-    },
-    {
-      path: '/auth/callback',
-      element: <AuthenticationCallback />
     },
     {
       path: '/profile',
@@ -30,8 +27,20 @@ const App = () => {
       )
     },
     {
-      path: '/marketplace',
-      element: <MarketplacePage />
+      path: '/projects',
+      element: (
+        <ProtectedRoute>
+          <ProjectsPage />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/readmd',
+      element: <ReadMdPage />
+    },
+    {
+      path: '*',
+      element: <ErrorPage />
     }
   ]);
 

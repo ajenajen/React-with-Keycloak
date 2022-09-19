@@ -1,41 +1,29 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setAuthenticated } from '../../../_redux/actions/authActions';
 import {
-  checkCookieAuthentication,
-  doLogin,
-  getIdToken,
-  getRefreshToken
-} from '../utils';
+  setAuthenticated,
+  setIsLoading
+} from '../../../_redux/actions/authActions';
+import { checkCookieAuthentication } from '../utils';
 
 export function useAuthentication() {
   const dispatch = useDispatch();
 
-  const idTokenInCookie = getIdToken();
-  const refreshTokenInCookie = getRefreshToken();
-
-  const handleCheckCookies = async () => {
-    await checkCookieAuthentication().then(() => {
-      dispatch(setAuthenticated(true));
-    });
-  };
-
   useEffect(() => {
-    const tokenInCookie =
-      idTokenInCookie !== undefined && refreshTokenInCookie !== undefined;
-
-    if (tokenInCookie) {
-      handleCheckCookies();
-    } else {
-      doLogin();
+    const isCookieAuthentication = checkCookieAuthentication();
+    if (isCookieAuthentication) {
+      dispatch(setAuthenticated(true));
     }
-  }, []);
 
-  return;
+    return () => {
+      dispatch(setIsLoading(false));
+      dispatch(setAuthenticated(false));
+    };
+  }, []);
 }
 
 export function useAuth() {
   const { auth } = useSelector((state) => state);
 
-  return { ...auth };
+  return { ...auth }; // userInfo
 }
