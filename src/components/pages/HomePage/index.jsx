@@ -1,15 +1,17 @@
 import MainLayout from '../../layout/MainLayout';
 import { useAuth } from '../../../services/auth';
+import ProjectList from '../ProjectsPage/section/ProjectList';
 
 function HomePage() {
-  const { isAuthenticated, sessionExpired } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   return (
     <MainLayout>
-      {`Authenticated: ${isAuthenticated}`}
+      {/* {`Authenticated: ${isAuthenticated}`}
       <br />
       <br />
-      {`SessionExpired: ${sessionExpired}`}
+      {`SessionExpired: ${sessionExpired}`} */}
+      {isAuthenticated && <ProjectList />}
     </MainLayout>
   );
 }

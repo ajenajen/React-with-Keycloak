@@ -25,12 +25,13 @@ export function useAuthentication({ pathname }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   const currentProject = store.project;
-  //   if (isAuthenticated) {
-  //     getIamAuthentication(currentProject);
-  //   }
-  // }, [isAuthenticated, store]);
+  useEffect(() => {
+    const currentProject = store.project;
+
+    if (isAuthenticated) {
+      getIamAuthentication(currentProject);
+    }
+  }, [isAuthenticated, store]);
 }
 
 export function useAuth() {

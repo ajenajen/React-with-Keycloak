@@ -1,4 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { setCurrentProject } from '../../../../_redux/actions/storeActions';
 import { getProjects } from '../../../../modules/project/services';
 
 export default function ProjectList() {
@@ -22,10 +25,14 @@ export default function ProjectList() {
 }
 
 function ProjectListItem({ data }) {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { projectCode, projectName } = data;
+
   const handleOnClick = useCallback((e) => {
     e.preventDefault();
-    console.log(projectCode);
+    dispatch(setCurrentProject(projectCode));
+    navigate('/cluster');
   }, []);
 
   return (

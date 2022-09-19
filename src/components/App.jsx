@@ -4,6 +4,7 @@ import ProtectedRoute from './common/ProtectedRoute';
 import HomePage from './pages/HomePage';
 import ProfilePage from './pages/ProfilePage';
 import ProjectsPage from './pages/ProjectsPage';
+import ClustersPage from './pages/ClustersPage';
 import ReadMdPage from './pages/ReadMdPage';
 import LogoutPage from './pages/Auth/LogoutPage';
 import ErrorPage from './pages/ErrorPage';
@@ -31,6 +32,14 @@ const App = () => {
       element: (
         <ProtectedRoute>
           <ProjectsPage />
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: '/cluster',
+      element: (
+        <ProtectedRoute>
+          <ClustersPage />
         </ProtectedRoute>
       )
     },

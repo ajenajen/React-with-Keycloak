@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import queryString from 'query-string';
@@ -133,7 +132,7 @@ export async function accessTokenAuthentication({ code = '', pathname = '/' }) {
   await axiosAuthenticationToken({ options, pathname });
 }
 
-export async function iamTokenAuthentication(project = null) {
+export async function iamTokenAuthentication(project = 'IDC2021_trial03') {
   const defaultData = {
     iamToken: undefined,
     k8sToken: undefined
@@ -141,35 +140,22 @@ export async function iamTokenAuthentication(project = null) {
 
   const idToken = getIdToken();
 
-  try {
-    const project = _.get(
-      JSON.parse(localStorage.getItem('selectedProject')),
-      `projectCode`,
-      ''
-    );
+  if (project !== '' || project !== null) {
+    const option = {
+      method: 'GET',
+      url: `${process.env.REACT_APP_API_IAM_PATH}/v1/iamtoken?projectCode=${project}`,
+      headers: { authorization: `Bearer ${idToken}` }
+    };
 
-    if (project) {
-      console.log('project', project);
-      const option = {
-        method: 'GET',
-        url: `${process.env.REACT_APP_API_IAM_PATH}/v1/iamtoken?projectCode=${project}`,
-        headers: { authorization: `Bearer ${idToken}` }
-      };
-      await axios(option).then(({ data: result }) => {
-        console.log('data', result);
-        // setIamToken(iamToken);
-        // return { ...result };
+    await axios(option)
+      .then(({ data: result }) => {
+        const { iamToken } = result; //k8sToken
+        setIamToken(iamToken);
+      })
+      .catch((e) => {
+        console.error(e);
+        return defaultData;
       });
-      // .catch((e) => {
-      //   console.error('Iam Authentication', e);
-      //   return defaultData;
-      // });
-    }
-    // else {
-    //   return defaultData;
-    // }
-  } catch (error) {
-    console.error(error);
   }
 }
 
