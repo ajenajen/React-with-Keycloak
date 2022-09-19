@@ -4,13 +4,17 @@ import {
   setAuthenticated,
   setIsLoading
 } from '../../../_redux/actions/authActions';
-import { checkCookieAuthentication } from '../utils';
+import { checkCookieAuthentication, iamTokenAuthentication } from '../utils';
 
-export function useAuthentication() {
+export function useAuthentication({ pathname }) {
   const dispatch = useDispatch();
+  const { auth, store } = useSelector((state) => state);
+  const isAuthenticated = auth.isAuthenticated;
+
+  const getIamAuthentication = async () => await iamTokenAuthentication();
 
   useEffect(() => {
-    const isCookieAuthentication = checkCookieAuthentication();
+    const isCookieAuthentication = checkCookieAuthentication({ pathname });
     if (isCookieAuthentication) {
       dispatch(setAuthenticated(true));
     }
@@ -20,6 +24,13 @@ export function useAuthentication() {
       dispatch(setAuthenticated(false));
     };
   }, []);
+
+  // useEffect(() => {
+  //   const currentProject = store.project;
+  //   if (isAuthenticated) {
+  //     getIamAuthentication(currentProject);
+  //   }
+  // }, [isAuthenticated, store]);
 }
 
 export function useAuth() {

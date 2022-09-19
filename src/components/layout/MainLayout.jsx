@@ -12,7 +12,7 @@ function MainLayout({ children }) {
 
   const { isAuthenticated, isLoading } = useAuth();
 
-  useAuthentication();
+  useAuthentication({ pathname });
 
   useEffect(() => {
     if (queryParamCode !== null && queryParamCode !== '') {

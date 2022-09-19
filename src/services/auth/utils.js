@@ -8,10 +8,15 @@ import {
   ID_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
   IAM_TOKEN_NAME,
+  ACCESS_TOKEN_NAME,
   authorizationUrl,
   accessTokenUrl,
   logoutUrl
 } from './configs';
+
+export function setAccessToken(token) {
+  Cookies.set(ACCESS_TOKEN_NAME, token, { httpOnly: false });
+}
 
 export function setIdToken(token) {
   Cookies.set(ID_TOKEN_NAME, token, { httpOnly: false });
@@ -41,6 +46,10 @@ export function getRefreshToken() {
 
 export function getIamToken() {
   return Cookies.get(IAM_TOKEN_NAME);
+}
+
+export function getAccessToken() {
+  return Cookies.get(ACCESS_TOKEN_NAME);
 }
 
 export function clearAllCookies() {
@@ -88,6 +97,21 @@ export function handleAuthenticationCallback({ code, pathname }) {
   accessTokenAuthentication({ code, pathname });
 }
 
+function axiosAuthenticationToken({ options, pathname }) {
+  return axios(options)
+    .then((response) => {
+      const { id_token, refresh_token, access_token } = response?.data;
+
+      setIdToken(id_token);
+      setRefreshToken(refresh_token);
+      setAccessToken(access_token);
+    })
+    .then(() => {
+      window.location.replace(pathname);
+    })
+    .catch((e) => console.error(e));
+}
+
 export async function accessTokenAuthentication({ code = '', pathname = '/' }) {
   const data = {
     grant_type: 'authorization_code',
@@ -106,33 +130,17 @@ export async function accessTokenAuthentication({ code = '', pathname = '/' }) {
     data: queryString.stringify(data)
   };
 
-  await axios(options)
-    .then(async (response) => {
-      const { id_token, refresh_token } = response?.data;
-
-      setIdToken(id_token);
-      setRefreshToken(refresh_token);
-
-      if (id_token !== undefined) {
-        return await iamTokenAuthentication(id_token)
-          .then((response) => {
-            const { iamToken } = response;
-            setIamToken(iamToken);
-          })
-          .then(() => {
-            window.location.replace(pathname);
-          })
-          .catch((e) => console.error(e));
-      }
-    })
-    .catch((e) => console.error(e));
+  await axiosAuthenticationToken({ options, pathname });
 }
 
-export async function iamTokenAuthentication(id_token) {
+export async function iamTokenAuthentication(project = null) {
   const defaultData = {
     iamToken: undefined,
     k8sToken: undefined
   };
+
+  const idToken = getIdToken();
+
   try {
     const project = _.get(
       JSON.parse(localStorage.getItem('selectedProject')),
@@ -141,28 +149,31 @@ export async function iamTokenAuthentication(id_token) {
     );
 
     if (project) {
+      console.log('project', project);
       const option = {
         method: 'GET',
         url: `${process.env.REACT_APP_API_IAM_PATH}/v1/iamtoken?projectCode=${project}`,
-        headers: { authorization: `Bearer ${id_token}` }
+        headers: { authorization: `Bearer ${idToken}` }
       };
-      await axios(option)
-        .then(({ data: result }) => {
-          return { ...result };
-        })
-        .catch((e) => {
-          console.error('Iam Authentication', e);
-          return defaultData;
-        });
-    } else {
-      return defaultData;
+      await axios(option).then(({ data: result }) => {
+        console.log('data', result);
+        // setIamToken(iamToken);
+        // return { ...result };
+      });
+      // .catch((e) => {
+      //   console.error('Iam Authentication', e);
+      //   return defaultData;
+      // });
     }
+    // else {
+    //   return defaultData;
+    // }
   } catch (error) {
     console.error(error);
   }
 }
 
-export function checkCookieAuthentication() {
+export async function checkCookieAuthentication({ pathname }) {
   let isCookieAuthentication = false;
   const idToken = getIdToken();
   const refreshToken = getRefreshToken();
@@ -176,17 +187,13 @@ export function checkCookieAuthentication() {
     if (refreshToken !== undefined && idToken !== undefined) {
       const decoded = jwt_decode(idToken);
 
-      // console.log(
-      //   'Date.now() > decoded.exp * 1000',
-      //   Date.now() > decoded.exp * 1000
-      // );
       if (Date.now() > decoded.exp * 1000) {
-        updateAuthorizationToken();
+        updateAuthorizationToken({ pathname });
       }
 
       isCookieAuthentication = true;
     } else if (idToken === undefined || noTokenCookies) {
-      // await doLogout();
+      await doLogout();
       isCookieAuthentication = false;
     }
   } catch (error) {
@@ -197,11 +204,11 @@ export function checkCookieAuthentication() {
   return isCookieAuthentication;
 }
 
-export async function updateAuthorizationToken() {
-  console.log('updateAuthorizationToken');
+export async function updateAuthorizationToken({ pathname = '/' }) {
+  const accessToken = getAccessToken();
   const data = {
-    client_id: process.env.REACT_APP_CLIENT_ID,
     grant_type: 'refresh_token',
+    client_id: process.env.REACT_APP_CLIENT_ID,
     refresh_token: getRefreshToken()
   };
 
@@ -209,31 +216,11 @@ export async function updateAuthorizationToken() {
     method: 'POST',
     url: accessTokenUrl,
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
+      authorization: `Bearer ${accessToken}`
     },
     data: queryString.stringify(data)
   };
 
-  await axios(options)
-    .then(async (response) => {
-      const { id_token, refresh_token } = response?.data;
-
-      setIdToken(id_token);
-      setRefreshToken(refresh_token);
-
-      if (id_token !== undefined) {
-        return await iamTokenAuthentication(id_token)
-          .then((response) => {
-            const { iamToken } = response;
-            setIamToken(iamToken);
-          })
-          .then(() => {
-            // window.location.replace(`/`);
-          })
-          .catch((e) => console.error(e));
-      }
-    })
-    .catch((e) => console.error(e));
-
-  // setIdToken(token);
+  await axiosAuthenticationToken({ options, pathname });
 }
