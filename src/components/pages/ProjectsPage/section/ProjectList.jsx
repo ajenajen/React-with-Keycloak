@@ -10,6 +10,7 @@ export default function ProjectList() {
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getProjects();
+      setCurrentProject(data[0]?.projectCode);
       setData(data);
     };
     fetchData();

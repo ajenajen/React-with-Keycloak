@@ -55,6 +55,7 @@ export function clearAllCookies() {
   Cookies.remove(ID_TOKEN_NAME, { path: '' });
   Cookies.remove(REFRESH_TOKEN_NAME, { path: '' });
   Cookies.remove(IAM_TOKEN_NAME, { path: '' });
+  Cookies.remove(ACCESS_TOKEN_NAME, { path: '' });
 }
 
 export function doLogin({ pathname = '/' }) {
@@ -132,7 +133,7 @@ export async function accessTokenAuthentication({ code = '', pathname = '/' }) {
   await axiosAuthenticationToken({ options, pathname });
 }
 
-export async function iamTokenAuthentication(project = 'IDC2021_trial03') {
+export async function iamTokenAuthentication(project = '') {
   const defaultData = {
     iamToken: undefined,
     k8sToken: undefined
@@ -159,7 +160,7 @@ export async function iamTokenAuthentication(project = 'IDC2021_trial03') {
   }
 }
 
-export async function checkCookieAuthentication({ pathname }) {
+export function checkCookieAuthentication({ pathname }) {
   let isCookieAuthentication = false;
   const idToken = getIdToken();
   const refreshToken = getRefreshToken();
@@ -179,7 +180,7 @@ export async function checkCookieAuthentication({ pathname }) {
 
       isCookieAuthentication = true;
     } else if (idToken === undefined || noTokenCookies) {
-      await doLogout();
+      // await doLogout({ pathname });
       isCookieAuthentication = false;
     }
   } catch (error) {

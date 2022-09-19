@@ -7,21 +7,25 @@ const HttpMethods = {
   DELETE: 'DELETE'
 };
 
-const _axios = axios.create();
+// const _axios = axios.create();
 
 const configure = () => {
-  _axios.interceptors.request.use((config) => {
-    const iamToken = Auth.getIamToken();
-
-    if (iamToken && config?.headers) {
-      config.headers.Authorization = `Bearer ${iamToken}`;
-      // const cb = () => {
-      //   return Promise.resolve(config);
-      // };
-      // return AuthService.updateToken(cb);
+  const iamToken = Auth.getIamToken();
+  axios.interceptors.request.use(
+    (config) => {
+      if (iamToken && config?.headers) {
+        config.headers.Authorization = `Bearer ${iamToken}`;
+        // const cb = () => {
+        //   return Promise.resolve(config);
+        // };
+        // return AuthService.updateToken(cb);
+      }
       return config;
+    },
+    (error) => {
+      Promise.reject(error);
     }
-  });
+  );
 };
 
 const HttpService = {

@@ -1,16 +1,29 @@
+import { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import MainLayout from '../../layout/MainLayout';
+import { getClusters } from '../../../modules/cluster/services';
 
 function ClustersPage() {
+  const [data, setData] = useState([]);
   const { store } = useSelector((state) => state);
   const currentProject = store.project;
 
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data } = await getClusters();
+      data && setData(data?.data);
+    };
+    fetchData();
+  }, [currentProject]);
+
   return (
     <MainLayout>
-      <div style={{ textAlign: 'center' }}>
+      <div>
         <h1>Project: {currentProject}</h1>
         <br />
-        <h2>ClustersPage</h2>
+        {data.map((item, index) => (
+          <div key={index}>{item.clusterName}</div>
+        ))}
       </div>
     </MainLayout>
   );
