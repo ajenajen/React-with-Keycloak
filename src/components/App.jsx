@@ -36,7 +36,7 @@ const App = () => {
       )
     },
     {
-      path: '/cluster',
+      path: `:projectCode/cluster`,
       element: (
         <ProtectedRoute>
           <ClustersPage />

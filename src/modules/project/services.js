@@ -13,7 +13,7 @@ export const getProjects = async () => {
     console.error(e);
 
     localStorage.setItem('errorMessage', 'System has a problem get projects');
-    window.location = '/error';
+    // window.location = '/error';
   });
 
   return data;

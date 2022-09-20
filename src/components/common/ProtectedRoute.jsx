@@ -4,9 +4,11 @@ import { useAuth } from '../../services/auth';
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuth();
 
-  if (!isAuthenticated) {
-    return <Navigate to="/" replace />;
-  }
+  setTimeout(() => {
+    if (!isAuthenticated) {
+      return <Navigate to="/" replace />;
+    }
+  }, 500);
 
   return children;
 }

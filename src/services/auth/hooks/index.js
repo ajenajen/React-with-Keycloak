@@ -27,11 +27,11 @@ export function useAuthentication({ pathname }) {
       dispatch(setIsLoading(false));
       dispatch(setAuthenticated(false));
     };
-  }, [dispatch, pathname]);
+  }, []);
 
   useEffect(() => {
-    if (isAuthenticated && currentProject && refreshToken) {
-      iamTokenAuthentication(currentProject);
+    if (isAuthenticated && currentProject.code && refreshToken) {
+      iamTokenAuthentication(currentProject.code);
     }
   }, [isAuthenticated, currentProject, refreshToken]);
 }

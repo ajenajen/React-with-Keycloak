@@ -97,8 +97,9 @@ export function handleAuthenticationCallback({ code, pathname }) {
   accessTokenAuthentication({ code, pathname });
 }
 
-function axiosAuthenticationToken({ options, pathname }) {
-  return axios(options)
+async function axiosAuthenticationToken({ options, pathname }) {
+  console.log('axiosAuthenticationToken');
+  return await axios(options)
     .then((response) => {
       const { id_token, refresh_token, access_token } = response?.data;
 
@@ -164,6 +165,7 @@ export function checkCookieAuthentication({ pathname }) {
   let isCookieAuthentication = false;
   const idToken = getIdToken();
   const refreshToken = getRefreshToken();
+  const refreshTime = 3 * 60; //3min
 
   const noTokenCookies = idToken === undefined || refreshToken === undefined;
 
@@ -173,14 +175,19 @@ export function checkCookieAuthentication({ pathname }) {
   try {
     if (refreshToken !== undefined && idToken !== undefined) {
       const decoded = jwt_decode(idToken);
-
-      if (Date.now() > decoded.exp * 1000) {
-        updateAuthorizationToken({ pathname });
-      }
+      const expTime = decoded.exp;
+      const now = Math.floor(new Date(Date.now()).getTime() / 1000); //+ 25200
+      const needRefresh = expTime - now <= refreshTime;
 
       isCookieAuthentication = true;
+
+      if (needRefresh) {
+        updateAuthorizationToken({ pathname });
+      } else if (now > expTime) {
+        isCookieAuthentication = false;
+        doLogout({ pathname });
+      }
     } else if (idToken === undefined || noTokenCookies) {
-      // await doLogout({ pathname });
       isCookieAuthentication = false;
     }
   } catch (error) {
@@ -191,13 +198,15 @@ export function checkCookieAuthentication({ pathname }) {
   return isCookieAuthentication;
 }
 
-export async function updateAuthorizationToken({ pathname = '/' }) {
+export async function updateAuthorizationToken({ pathname }) {
   const accessToken = getAccessToken();
   const data = {
     grant_type: 'refresh_token',
     client_id: process.env.REACT_APP_CLIENT_ID,
     refresh_token: getRefreshToken()
   };
+
+  console.log('updateAuthorizationToken', data);
 
   const options = {
     method: 'POST',
@@ -209,5 +218,18 @@ export async function updateAuthorizationToken({ pathname = '/' }) {
     data: queryString.stringify(data)
   };
 
-  await axiosAuthenticationToken({ options, pathname });
+  await axios(options)
+    .then((response) => {
+      const { id_token, refresh_token, access_token } = response?.data;
+
+      setIdToken(id_token);
+      setRefreshToken(refresh_token);
+      setAccessToken(access_token);
+    })
+    .then(() => {
+      window.location.replace(pathname);
+    })
+    .catch((e) => console.error(e));
+
+  // axiosAuthenticationToken({ options, pathname });
 }

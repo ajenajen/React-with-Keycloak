@@ -9,6 +9,11 @@ function ClustersPage() {
   const currentProject = store.project;
 
   useEffect(() => {
+    // Change to get from localStorage in future
+    if (!currentProject.code) {
+      window.location.href = '/';
+    }
+
     const fetchData = async () => {
       const { data } = await getClusters();
       data && setData(data?.data);
@@ -19,7 +24,9 @@ function ClustersPage() {
   return (
     <MainLayout>
       <div>
-        <h1>Project: {currentProject}</h1>
+        <h1>
+          Project: {currentProject?.name} ({currentProject?.code})
+        </h1>
         <br />
         {data.map((item, index) => (
           <div key={index}>{item.clusterName}</div>

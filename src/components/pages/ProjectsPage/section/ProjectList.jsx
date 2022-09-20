@@ -1,17 +1,30 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { setCurrentProject } from '../../../../_redux/actions/storeActions';
+import { setSelectedStore } from '../../../../_redux/actions/storeActions';
 import { getProjects } from '../../../../modules/project/services';
 
 export default function ProjectList() {
+  const dispatch = useDispatch();
   const [data, setData] = useState([]);
+  const { store } = useSelector((state) => state);
+  const currentProject = store.project;
 
   useEffect(() => {
     const fetchData = async () => {
       const { data } = await getProjects();
-      setCurrentProject(data[0]?.projectCode);
-      setData(data);
+      if (data) {
+        dispatch(
+          setSelectedStore({
+            project: {
+              name: currentProject?.name || data[0]?.projectName,
+              code: currentProject?.code || data[0]?.projectCode
+            }
+          })
+        );
+        // set to localStorage
+        setData(data);
+      }
     };
     fetchData();
   }, []);
@@ -32,8 +45,10 @@ function ProjectListItem({ data }) {
 
   const handleOnClick = useCallback((e) => {
     e.preventDefault();
-    dispatch(setCurrentProject(projectCode));
-    navigate('/cluster');
+    dispatch(
+      setSelectedStore({ project: { name: projectName, code: projectCode } })
+    );
+    navigate(`/${projectCode}/cluster`);
   }, []);
 
   return (

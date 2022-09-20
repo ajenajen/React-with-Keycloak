@@ -1,33 +1,18 @@
-import {
-  SET_CURRENT_PROJECT,
-  SET_CURRENT_CLUSTER,
-  SET_CURRENT_NAMESPACE
-} from '../actions/storeActions';
+import { SET_SELECTED_STORE } from '../actions/storeActions';
 
 const initialState = {
-  project: '',
+  project: { name: '', code: '' },
   cluster: '',
   namespace: ''
 };
 
 const storeReducer = (state = initialState, action) => {
   switch (action.type) {
-    case SET_CURRENT_PROJECT:
+    case SET_SELECTED_STORE:
       return {
-        ...state,
-        project: action.payload
-      };
-
-    case SET_CURRENT_CLUSTER:
-      return {
-        ...state,
-        cluster: action.payload
-      };
-
-    case SET_CURRENT_NAMESPACE:
-      return {
-        ...state,
-        namespace: action.payload
+        project: action.payload.project || { ...state.project },
+        cluster: action.payload.cluster || state.cluster,
+        namespace: action.payload.namespace || state.namespace
       };
 
     default:
