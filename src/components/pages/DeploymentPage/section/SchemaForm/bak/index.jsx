@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { isEqual } from 'lodash';
 
-import MainLayout from '../../layout/MainLayout';
-import schema from '../../data/kubeapp/values.schema.json';
+import MainLayout from '../../../../../layout/MainLayout';
+import schema from '../../../../../data/kubeapp/values.schema.json';
 import values from '../../data/kubeapp/values.yml';
 import { retrieveBasicFormParams } from './utils';
-import Param from './Param';
+import Param from '../../../Param';
 
 function SchemaPage() {
   const [basicFormParameters, setBasicFormParameters] = useState([]);

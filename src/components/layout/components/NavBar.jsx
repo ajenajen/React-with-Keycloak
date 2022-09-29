@@ -28,12 +28,19 @@ function NavBar({ isAuthenticated = false, currentPathname }) {
         <Link style={{ margin: 10 }} to="/readmd">
           Read .Md
         </Link>
-        <Link style={{ margin: 10 }} to="/schema">
-          Schema
-        </Link>
-        <Link style={{ margin: 10 }} to="/projects">
-          Projects
-        </Link>
+        {isAuthenticated && (
+          <>
+            <Link style={{ margin: 10 }} to="/projects">
+              Projects
+            </Link>
+            <Link style={{ margin: 10 }} to="/deployment">
+              Deployment
+            </Link>
+          </>
+        )}
+        {/* <Link style={{ margin: 10 }} to="/profile">
+          Profile
+        </Link> */}
 
         <div
           css={{
@@ -47,12 +54,7 @@ function NavBar({ isAuthenticated = false, currentPathname }) {
           {!isAuthenticated ? (
             <button onClick={handleLogin}>Sign in</button>
           ) : (
-            <>
-              <Link style={{ margin: 10 }} to="/profile">
-                Profile
-              </Link>
-              <button onClick={handleLogout}>Sign out</button>
-            </>
+            <button onClick={handleLogout}>Sign out</button>
           )}
         </div>
       </nav>
