@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import styled from 'styled-components';
 import { HashLink as Link } from 'react-router-hash-link';
 
-import MockupData from './Readme.md';
+import MockupData from '../../data/redis/README.md';
 import MainLayout from '../../layout/MainLayout';
 
 const Flex = styled.div`
@@ -25,13 +25,18 @@ const Flex = styled.div`
 function ReadMdPage() {
   const [description, setDestcription] = useState([]);
 
-  useEffect(() => {
+  const fetchDescription = useCallback(() => {
     fetch(MockupData)
       .then((res) => res.text())
       .then((text) =>
         setDestcription(text.match(/^#+ [^#]*(?:#(?!#)[^#]*)*/gm))
       );
-  });
+  }, []);
+
+  useEffect(() => {
+    fetchDescription();
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <MainLayout>
@@ -59,7 +64,10 @@ function ReadMdPage() {
                   h6: HeadingRenderer,
                   a: LinkRenderer,
                   code: CodeRenderer,
-                  table: TableRenderer
+                  table: TableRenderer,
+                  p: ({ children }) => {
+                    <div>{children}</div>;
+                  }
                 }}
                 skipHtml={true}
               >
@@ -101,20 +109,16 @@ function TableRenderer(props) {
 }
 
 function CodeRenderer(props) {
-  // const html = prismCodeHtml(props.value, props.language);
-
   return (
-    <pre
+    <div
       style={{
         color: '#66d9ef',
         padding: 10,
         borderRadius: 10,
         background: '#333'
       }}
-    >
-      {props.children}
-      {/* <code dangerouslySetInnerHTML={{ __html: props.children }} /> */}
-    </pre>
+      dangerouslySetInnerHTML={{ __html: props.children }}
+    />
   );
 }
 

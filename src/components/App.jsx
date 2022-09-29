@@ -6,6 +6,7 @@ import ProfilePage from './pages/ProfilePage';
 import ProjectsPage from './pages/ProjectsPage';
 import ClustersPage from './pages/ClustersPage';
 import ReadMdPage from './pages/ReadMdPage';
+import SchemaPage from './pages/SchemaPage';
 import LogoutPage from './pages/Auth/LogoutPage';
 import ErrorPage from './pages/ErrorPage';
 
@@ -46,6 +47,10 @@ const App = () => {
     {
       path: '/readmd',
       element: <ReadMdPage />
+    },
+    {
+      path: '/schema',
+      element: <SchemaPage />
     },
     {
       path: '*',

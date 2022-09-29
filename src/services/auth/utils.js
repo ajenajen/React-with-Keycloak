@@ -180,12 +180,13 @@ export function checkCookieAuthentication({ pathname }) {
       const needRefresh = expTime - now <= refreshTime;
 
       isCookieAuthentication = true;
+      console.log('now', now, 'expTime', expTime);
 
-      if (needRefresh) {
-        updateAuthorizationToken({ pathname });
-      } else if (now > expTime) {
+      if (now > expTime) {
         isCookieAuthentication = false;
         doLogout({ pathname });
+      } else if (needRefresh) {
+        updateAuthorizationToken({ pathname });
       }
     } else if (idToken === undefined || noTokenCookies) {
       isCookieAuthentication = false;

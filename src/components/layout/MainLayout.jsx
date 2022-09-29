@@ -3,7 +3,8 @@ import { useLocation, useSearchParams } from 'react-router-dom';
 import { AuthService, useAuthentication, useAuth } from '../../services/auth';
 import Loading from '../common/Loading';
 
-import NavBar from './NavBar';
+import Header from './components/Header';
+import NavBar from './components/NavBar';
 
 function MainLayout({ children }) {
   const { pathname } = useLocation();
@@ -28,9 +29,10 @@ function MainLayout({ children }) {
   }
 
   return (
-    <div className="container">
+    <div className="page-wrapper">
+      <Header />
       <NavBar isAuthenticated={isAuthenticated} currentPathname={pathname} />
-      {children}
+      <main>{children}</main>
     </div>
   );
 }

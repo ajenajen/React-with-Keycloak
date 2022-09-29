@@ -27,7 +27,8 @@ export default function ProjectList() {
       }
     };
     fetchData();
-  }, []);
+    // eslint-disable-next-line
+  }, [currentProject]);
 
   return (
     <>
@@ -49,11 +50,12 @@ function ProjectListItem({ data }) {
       setSelectedStore({ project: { name: projectName, code: projectCode } })
     );
     navigate(`/${projectCode}/cluster`);
+    // eslint-disable-next-line
   }, []);
 
   return (
     <a
-      href="#"
+      href="/"
       onClick={handleOnClick}
       style={{ display: 'block', padding: 10, color: '#999' }}
     >
