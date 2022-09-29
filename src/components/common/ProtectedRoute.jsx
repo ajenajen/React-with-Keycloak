@@ -9,7 +9,6 @@ function ProtectedRoute({ children }) {
       return <Navigate to="/" replace />;
     }
   }, 500);
-
   return children;
 }
 

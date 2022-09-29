@@ -1,13 +1,16 @@
-import shemaData from '../../../../data/redis/values.schema.json';
 import validator from '@rjsf/validator-ajv6';
 import Form from '@rjsf/core';
 
-function SchemaForm() {
+function SchemaForm({ values, handleValuesChange }) {
+  const handleOnChange = () => {
+    console.log('changed');
+  };
+
   return (
     <Form
-      schema={shemaData}
+      schema={values}
       validator={validator}
-      onChange={console.log('changed')}
+      onChange={handleOnChange}
       onSubmit={console.log('submitted')}
       onError={console.log('errors')}
     />

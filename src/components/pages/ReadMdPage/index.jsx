@@ -1,52 +1,75 @@
-import React, { useEffect, useState, useCallback } from 'react';
+/** @jsxImportSource @emotion/react */
+import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import styled from 'styled-components';
 import { HashLink as Link } from 'react-router-hash-link';
 
-import MockupData from '../../data/redis/README.md';
+import { initSelected } from '../DeploymentPage/data';
 import MainLayout from '../../layout/MainLayout';
 
-const Flex = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  padding: 15px;
-  .table {
-    border-spacing: 0;
-    border-collapse: collapse;
-    th,
-    td {
-      padding: 6px 13px;
-      border: 1px solid #ccc;
-    }
-  }
-`;
-
 function ReadMdPage() {
+  const {
+    availablePackageDetail: {
+      name,
+      repoUrl,
+      homeUrl,
+      iconUrl,
+      shortDescription,
+      readme
+    }
+  } = initSelected;
   const [description, setDestcription] = useState([]);
 
-  const fetchDescription = useCallback(() => {
-    fetch(MockupData)
-      .then((res) => res.text())
-      .then((text) =>
-        setDestcription(text.match(/^#+ [^#]*(?:#(?!#)[^#]*)*/gm))
-      );
-  }, []);
-
   useEffect(() => {
-    fetchDescription();
-    // eslint-disable-next-line
-  }, []);
+    setDestcription(readme.match(/^#+ [^#]*(?:#(?!#)[^#]*)*/gm));
+  }, [readme]);
 
   return (
     <MainLayout>
-      <Flex>
-        <div style={{ flex: '0 0 30%' }}></div>
-        <div style={{ flex: '0 0 70%' }}>
+      <div
+        css={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          '.table': {
+            borderSpacing: 0,
+            borderCollapse: 'collapse',
+            'th, td': {
+              padding: '6px 13px',
+              border: '1px solid #ccc'
+            }
+          }
+        }}
+      >
+        <div
+          css={{
+            flex: '0 0 calc(25% - 30px)',
+            paddingRight: 30,
+            maxWidth: 'calc(25% - 30px)'
+          }}
+        >
+          <h1 css={{ fontSize: '2em', marginBottom: 10 }}>
+            <img css={{ width: 30, marginRight: 10 }} src={iconUrl} />
+            {name}
+          </h1>
+          <table className="table">
+            <tr>
+              <td>Repo URL</td>
+              <td>{repoUrl}</td>
+            </tr>
+            <tr>
+              <td>URL</td>
+              <td>{homeUrl}</td>
+            </tr>
+            <tr>
+              <td colSpan={2}>{shortDescription}</td>
+            </tr>
+          </table>
+        </div>
+        <div css={{ flex: '0 0 75%', maxWidth: '75%' }}>
           {description.map((paragraph, index) => (
             <div
               key={index}
-              style={{
+              css={{
                 background: '#eee',
                 padding: 15,
                 marginBottom: 15,
@@ -76,7 +99,7 @@ function ReadMdPage() {
             </div>
           ))}
         </div>
-      </Flex>
+      </div>
     </MainLayout>
   );
 }
