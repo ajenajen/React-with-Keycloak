@@ -1,19 +1,20 @@
-import validator from '@rjsf/validator-ajv6';
-import Form from '@rjsf/core';
+import Param from './Param';
 
-function SchemaForm({ values, handleValuesChange }) {
-  const handleOnChange = () => {
-    console.log('changed');
-  };
+function SchemaForm(props) {
+  const { params } = props;
 
   return (
-    <Form
-      schema={values}
-      validator={validator}
-      onChange={handleOnChange}
-      onSubmit={console.log('submitted')}
-      onError={console.log('errors')}
-    />
+    <div id="deployment-tab-data-form">
+      {params.map((param, i) => {
+        const id = `${param.path}-${i}`;
+
+        return (
+          <div key={id}>
+            <Param {...props} param={param} id={id} />
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

@@ -1,7 +1,12 @@
 import * as jsonpatch from 'fast-json-patch';
-import * as yaml from 'js-yaml';
 import { isEmpty, set } from 'lodash';
-import YAML, { ToStringOptions, Scalar } from 'yaml';
+import YAML, { Scalar } from 'yaml';
+
+const toStringOptions = {
+  defaultKeyType: 'PLAIN',
+  defaultStringType: Scalar.QUOTE_DOUBLE,
+  nullStr: ''
+};
 
 export function retrieveBasicFormParams(defaultValues, schema, parentPath) {
   let params = [];
@@ -9,18 +14,16 @@ export function retrieveBasicFormParams(defaultValues, schema, parentPath) {
   if (schema && schema.properties) {
     const properties = schema.properties;
 
-    Object.keys(properties).forEach((propertyKey) => {
-      // The param path is its parent path + the object key
+    Object.keys(properties).map((propertyKey) => {
       const itemPath = `${parentPath || ''}${propertyKey}`;
       const { type, form } = properties[propertyKey];
-      // If the property has the key "form", it's a basic parameter
       if (form) {
-        // Use the default value either from the JSON schema or the default values
-        const value = getValue(
+        const value = getYamlValue(
           defaultValues,
           itemPath,
           properties[propertyKey].default
         );
+
         const param = {
           ...properties[propertyKey],
           path: itemPath,
@@ -57,11 +60,9 @@ export function retrieveBasicFormParams(defaultValues, schema, parentPath) {
   return params;
 }
 
-const toStringOptions = {
-  defaultKeyType: 'PLAIN',
-  defaultStringType: Scalar.QUOTE_DOUBLE, // Preserving double quotes in scalars (see https://github.com/vmware-tanzu/kubeapps/issues/3621)
-  nullStr: '' // Avoid to explicitly add "null" when an element is not defined
-};
+export function parseValues(values) {
+  return YAML.parseDocument(values, toStringOptions).toString(toStringOptions);
+}
 
 function splitPath(path) {
   return (
@@ -110,7 +111,9 @@ function parsePathAndValue(doc, path, value) {
     0,
     splittedPath?.length - 1
   );
+
   const parentNode = doc.getIn(allElementsButTheLast);
+
   if (parentNode === undefined) {
     const definedPath = getDefinedPath(allElementsButTheLast, doc);
     const remainingPath = splittedPath?.slice(definedPath?.length + 1);
@@ -120,18 +123,19 @@ function parsePathAndValue(doc, path, value) {
   return { splittedPath: unescapePath(splittedPath), value };
 }
 
-// getValue returns the current value of an object based on YAML text and its path
-export function getValue(values, path, defaultValue) {
-  const doc = YAML.parseDocument(values, { toStringDefaults: toStringOptions });
+export function getYamlValue(values, path, defaultValue) {
+  const doc = YAML.parseDocument(values, toStringOptions);
   const splittedPath = parsePath(path);
   const value = doc.getIn(splittedPath);
+
   return value === undefined || value === null ? defaultValue : value;
 }
 
-export function setValue(values, path, newValue) {
-  const doc = YAML.parseDocument(values, { toStringDefaults: toStringOptions });
+export function setYamlValue(values, path, newValue) {
+  const doc = YAML.parseDocument(values, toStringOptions);
   const { splittedPath, value } = parsePathAndValue(doc, path, newValue);
   doc.setIn(splittedPath, value);
+
   return doc.toString(toStringOptions);
 }
 
@@ -146,6 +150,8 @@ export function getValueFromEvent(e) {
       // value is a number
       value = parseInt(value, 10);
       break;
+    default:
+      return value;
   }
   return value;
 }
