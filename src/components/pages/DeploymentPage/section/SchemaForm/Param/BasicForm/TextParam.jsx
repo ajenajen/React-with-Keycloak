@@ -30,10 +30,11 @@ export default function TextParam({
   };
 
   useEffect(() => {
-    if ((isNumber(param.value) || !isEmpty(param.value)) && !valueModified) {
+    if (isNumber(param.value) || !isEmpty(param.value)) {
+      //&& !valueModified
       setValue(param.value);
     }
-  }, [valueModified, param.value]);
+  }, [param.value]); //valueModified
 
   let input = (
     <input

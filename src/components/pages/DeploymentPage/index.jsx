@@ -25,9 +25,6 @@ export default function DeploymentPage() {
   const [deployedValues, setDeployedValues] = useState('');
   const deploymentEvent = 'install';
 
-  // console.log('appValues: ', appValues);
-  // console.log('basicFormParameters: ', basicFormParameters);
-
   const {
     availablePackageDetail: { name, homeUrl },
     schema,
@@ -51,10 +48,6 @@ export default function DeploymentPage() {
     setAppValues(value);
     setValuesModified(true);
   };
-
-  //  const refreshBasicParameters = () => {
-  //    setBasicFormParamsParameters(retrieveBasicFormParams(appValues, schema));
-  //  };
 
   useEffect(() => {
     if (!valuesModified) {
@@ -84,7 +77,13 @@ export default function DeploymentPage() {
     };
   };
 
-  // restoreDefaultValues;
+  const restoreDefaultValues = () => {
+    if (values) {
+      setAppValues(values);
+      setBasicFormParameters(retrieveBasicFormParams(values, schema));
+    }
+    // setRestoreModalOpen(false);
+  };
 
   const setValuesModifiedTrue = () => setValuesModified(true);
 
@@ -146,6 +145,15 @@ export default function DeploymentPage() {
               />
             </TabPanel>
           </Tabs>
+          <div>
+            <button
+              className="btn btn-danger"
+              type="submit"
+              onClick={restoreDefaultValues}
+            >
+              Restore default
+            </button>
+          </div>
         </div>
       </div>
     </MainLayout>
