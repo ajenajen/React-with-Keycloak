@@ -16,15 +16,11 @@ export function setAuthHeaders(axiosInstance) {
 
     const url = get(config, `url`, '');
     const idToken = AuthService.getIdToken();
-    const iamToken = AuthService.getIamToken();
 
     setHeader();
 
     function setHeader() {
-      if (includes(url, 'tks-apps-backend.dev.nxcp.trueidc')) {
-        config.headers['iamToken'] = iamToken;
-      }
-      if (includes(url, 'tks-iam-authority')) {
+      if (includes(url, 'api-id-token')) {
         config.headers.Authorization = `Bearer ${idToken}`;
       }
     }

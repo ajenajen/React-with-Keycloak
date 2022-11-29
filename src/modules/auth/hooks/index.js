@@ -3,17 +3,8 @@ import { isEmpty } from 'lodash';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from 'stores/store';
 
-import {
-  fetchAuthenToken,
-  checkAuthenToken,
-  setIamTokenReady
-} from 'stores/actions/authActions';
+import { fetchAuthenToken, checkAuthenToken } from 'stores/actions/authActions';
 import * as AuthService from 'modules/auth/services';
-
-const selectProject = {
-  projectCode: 'IDC2021_trial03',
-  projectName: 'IDC2021 trial03'
-};
 
 export function useCallbackKeyCloak(pathname) {
   const dispatch = useAppDispatch();
@@ -33,29 +24,6 @@ export function useCallbackKeyCloak(pathname) {
   }, [code, dispatch, isRedirectFromKeyCloak, pathname]);
 }
 
-export function useFetchIamToken({ pathname, selected }) {
-  const {
-    auth: { authenticated }
-  } = useAppSelector((state) => state);
-  const dispatch = useAppDispatch();
-  const idToken = AuthService.getIdToken();
-  const iamToken = AuthService.getIamToken();
-
-  useEffect(() => {
-    if (authenticated && !isEmpty(selected) && idToken && !iamToken) {
-      AuthService.getIamTokenAuthentication({
-        project: selected
-      }).then(() => dispatch(setIamTokenReady(true)));
-    }
-  }, [authenticated, dispatch, iamToken, idToken, selected]);
-
-  useEffect(() => {
-    if (authenticated && iamToken) {
-      dispatch(setIamTokenReady(true));
-    }
-  }, [authenticated, iamToken, dispatch]);
-}
-
 export function useAuthentication() {
   const {
     auth: { authenticated }
@@ -67,12 +35,10 @@ export function useAuthentication() {
   // support redirect from keycloak
   useCallbackKeyCloak(pathname);
 
-  useFetchIamToken({ pathname, selected: selectProject });
-
-  useCheckAuthentication({ selected: selectProject });
+  useCheckAuthentication();
 }
 
-export function useCheckAuthentication({ selected }) {
+export function useCheckAuthentication() {
   const [windowOnFocus, setWindowOnFocus] = useState(true);
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
@@ -90,9 +56,8 @@ export function useCheckAuthentication({ selected }) {
   }, [windowOnFocus]);
 
   useEffect(() => {
-    windowOnFocus &&
-      dispatch(checkAuthenToken({ pathname, selectProject: selected }));
-  }, [windowOnFocus, pathname, dispatch, selected]);
+    windowOnFocus && dispatch(checkAuthenToken({ pathname }));
+  }, [windowOnFocus, pathname, dispatch]);
 }
 
 export function useAuth() {

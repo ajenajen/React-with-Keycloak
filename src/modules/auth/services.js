@@ -6,7 +6,6 @@ import { axios } from 'modules/api/AxiosInstance';
 import {
   ID_TOKEN_NAME,
   REFRESH_TOKEN_NAME,
-  IAM_TOKEN_NAME,
   ACCESS_TOKEN_NAME,
   authorizationUrl,
   accessTokenUrl,
@@ -38,10 +37,6 @@ export function setRefreshToken(token) {
   });
 }
 
-export function setIamToken(token) {
-  CookiesWithDomain.set(IAM_TOKEN_NAME, token);
-}
-
 export function getIdToken() {
   return CookiesWithDomain.get(ID_TOKEN_NAME);
 }
@@ -50,16 +45,8 @@ export function getRefreshToken() {
   return CookiesWithDomain.get(REFRESH_TOKEN_NAME);
 }
 
-export function getIamToken() {
-  return CookiesWithDomain.get(IAM_TOKEN_NAME);
-}
-
 export function getAccessToken() {
   return CookiesWithDomain.get(ACCESS_TOKEN_NAME);
-}
-
-export function removeIamToken() {
-  return CookiesWithDomain.remove(IAM_TOKEN_NAME);
 }
 
 function removeStoredDoingLogin() {
@@ -69,7 +56,6 @@ function removeStoredDoingLogin() {
 export function clearAllCookies() {
   CookiesWithDomain.remove(ID_TOKEN_NAME);
   CookiesWithDomain.remove(REFRESH_TOKEN_NAME);
-  CookiesWithDomain.remove(IAM_TOKEN_NAME);
   CookiesWithDomain.remove(ACCESS_TOKEN_NAME);
   removeStoredDoingLogin();
 }
@@ -168,38 +154,11 @@ export function accessTokenAuthentication({ code = '', pathname = '/' }) {
     });
 }
 
-export function getIamTokenAuthentication({ project }) {
-  const options = {
-    method: 'POST',
-    url: `${process.env.REACT_APP_IAM_URL}/iam`,
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    data: { domain: `${project?.projectCode}/th`, scope: ['tks-apps'] }
-  };
-
-  return axios
-    .request(options)
-    .then(({ data }) => {
-      console.log('getIamTokenAuthentication', data);
-      const { iamtoken } = data;
-      setIamToken(iamtoken);
-
-      return data;
-    })
-    .catch((e) => {
-      console.error(e);
-    });
-}
-
 function getCookieExpire() {
   const idToken = getIdToken();
-  const iamToken = getIamToken();
   const expIdToken = idToken && jwt_decode(idToken).exp;
-  const expIamToken = iamToken && jwt_decode(iamToken).exp;
   return {
-    expIdToken,
-    expIamToken
+    expIdToken
   };
 }
 
@@ -208,7 +167,7 @@ const TIME_RENEW = 60 * 3;
 export async function checkCookieAuthentication({ pathname, selectProject }) {
   const refreshToken = getRefreshToken();
   const idToken = getIdToken();
-  const { expIdToken, expIamToken } = getCookieExpire();
+  const { expIdToken } = getCookieExpire();
 
   let isCookieAuthentication = false;
   const timeRenew = TIME_RENEW;
@@ -225,18 +184,10 @@ export async function checkCookieAuthentication({ pathname, selectProject }) {
         isCookieAuthentication = false;
         doLogout({ currentPathname: pathname });
       } else if (now + timeRenew >= expIdToken) {
-        const { id_token: idTokenRsp } = await updateAuthorizationToken({
+        const { id_token } = await updateAuthorizationToken({
           pathname
         });
-        const { iamToken: iamTokenRsp } = await getIamTokenAuthentication({
-          project: selectProject
-        });
-        isCookieAuthentication = idTokenRsp && iamTokenRsp ? true : false;
-      } else if (now + timeRenew >= expIamToken) {
-        const { iamToken: iamTokenRsp } = await getIamTokenAuthentication({
-          project: selectProject
-        });
-        isCookieAuthentication = iamTokenRsp ? true : false;
+        isCookieAuthentication = id_token ? true : false;
       }
 
       isCookieAuthentication = true;

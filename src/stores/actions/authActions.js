@@ -7,7 +7,6 @@ export const SET_AUTHENTICATED = 'SET_AUTHENTICATED';
 export const SET_AUTHENTICATING = 'SET_AUTHENTICATING';
 export const SET_AUTHENTICATION_ERROR = 'SET_AUTHENTICATION_ERROR';
 export const SET_SESSION_EXPIRED = 'SET_SESSION_EXPIRED';
-export const SET_IAM_TOKEN_READY = 'SET_IAM_TOKEN_READY';
 export const SET_FETCHING_FIRSTTIME = 'SET_FETCHING_FIRSTTIME';
 
 export const fetchAuthenToken =
@@ -29,10 +28,9 @@ export const fetchAuthenToken =
   };
 
 export const checkAuthenToken =
-  ({ selectProject, pathname }) =>
+  ({ pathname }) =>
   async (dispatch, getState) => {
     checkCookieAuthentication({
-      selectProject,
       pathname
     })
       .then((response) => {
@@ -64,12 +62,6 @@ export function setAuthenticating(value) {
 export function setSessionExpired(value) {
   return {
     type: SET_SESSION_EXPIRED,
-    payload: value
-  };
-}
-export function setIamTokenReady(value) {
-  return {
-    type: SET_IAM_TOKEN_READY,
     payload: value
   };
 }
