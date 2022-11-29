@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import ReactDiffViewer, { DiffMethod } from 'react-diff-viewer';
 
 function DifferentialForm({

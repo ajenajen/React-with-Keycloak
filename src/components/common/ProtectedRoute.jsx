@@ -1,15 +1,13 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../services/auth';
+import { useAuth } from 'modules/auth';
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated } = useAuth();
+function ProtectedRoute({ pathname, outlet }) {
+  const { authenticated } = useAuth();
 
-  setTimeout(() => {
-    if (!isAuthenticated) {
-      return <Navigate to="/" replace />;
-    }
-  }, 500);
-  return children;
+  if (!authenticated) {
+    return <>Error router</>;
+  }
+
+  return outlet;
 }
 
 export default ProtectedRoute;

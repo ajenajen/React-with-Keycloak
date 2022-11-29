@@ -1,20 +1,22 @@
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import { setAuthHeaders, axios } from 'modules/api/AxiosInstance';
 
-import App from './components/App';
-import StoreService from './services/StoreService';
-import ThemeProvider from './styles/ThemeProvider';
+import App from 'components/App';
+import { configureStore } from 'stores/store';
+import ThemeProvider from 'styles/ThemeProvider';
 
-const store = StoreService.setup();
+setAuthHeaders(axios);
+const store = configureStore();
+const root = ReactDOM.createRoot(document.getElementById('root'));
 
-ReactDOM.render(
+root.render(
   <Provider store={store}>
-    <BrowserRouter>
-      <ThemeProvider>
+    <ThemeProvider>
+      <BrowserRouter>
         <App />
-      </ThemeProvider>
-    </BrowserRouter>
-  </Provider>,
-  document.getElementById('root')
+      </BrowserRouter>
+    </ThemeProvider>
+  </Provider>
 );

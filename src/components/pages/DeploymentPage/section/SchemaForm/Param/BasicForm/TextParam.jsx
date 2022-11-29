@@ -9,12 +9,12 @@ export default function TextParam({
   handleBasicFormParamChange
 }) {
   const [value, setValue] = useState(param.value || '');
-  const [valueModified, setValueModified] = useState(false);
+  // const [valueModified, setValueModified] = useState(false);
   const [timeout, setThisTimeout] = useState({});
 
   const onChange = (e) => {
     setValue(e.currentTarget.value);
-    setValueModified(true);
+    // setValueModified(true);
 
     // Gather changes before submitting
     clearTimeout(timeout);

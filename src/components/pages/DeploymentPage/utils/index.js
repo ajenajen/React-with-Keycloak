@@ -54,6 +54,7 @@ export function retrieveBasicFormParams(defaultValues, schema, parentPath) {
           );
         }
       }
+      return false;
     });
   }
 

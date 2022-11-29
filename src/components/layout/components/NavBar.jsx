@@ -1,15 +1,15 @@
 /** @jsxImportSource @emotion/react */
 import { useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { AuthService } from '../../../services/auth';
+import * as AuthService from 'modules/auth/services';
 
 function NavBar({ isAuthenticated = false, currentPathname }) {
   const handleLogin = useCallback(
-    async () => AuthService.doLogin({ pathname: currentPathname }),
+    async () => AuthService.doLogin({ currentPathname }),
     [currentPathname]
   );
   const handleLogout = useCallback(
-    async () => AuthService.doLogout({ pathname: currentPathname }),
+    async () => AuthService.doLogout({ currentPathname }),
     [currentPathname]
   );
 
@@ -25,22 +25,19 @@ function NavBar({ isAuthenticated = false, currentPathname }) {
         <Link style={{ margin: 10 }} to="/">
           Home
         </Link>
-        <Link style={{ margin: 10 }} to="/readmd">
-          Read .Md
-        </Link>
         {isAuthenticated && (
           <>
             <Link style={{ margin: 10 }} to="/projects">
               Projects
             </Link>
-            <Link style={{ margin: 10 }} to="/deployment">
+            <Link style={{ margin: 10 }} to="/project/readme">
+              Read .Md
+            </Link>
+            <Link style={{ margin: 10 }} to="/project/deploy">
               Deployment
             </Link>
           </>
         )}
-        {/* <Link style={{ margin: 10 }} to="/profile">
-          Profile
-        </Link> */}
 
         <div
           css={{

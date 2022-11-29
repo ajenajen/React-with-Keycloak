@@ -1,2 +1,2 @@
 export { useAuth, useAuthentication } from './hooks';
-export * as AuthService from './utils';
+export * as AuthService from './services';

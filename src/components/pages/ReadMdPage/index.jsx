@@ -1,4 +1,3 @@
-/** @jsxImportSource @emotion/react */
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -48,7 +47,11 @@ function ReadMdPage() {
           }}
         >
           <h1 css={{ fontSize: '2em', marginBottom: 10 }}>
-            <img css={{ width: 30, marginRight: 10 }} src={iconUrl} />
+            <img
+              css={{ width: 30, marginRight: 10 }}
+              src={iconUrl}
+              alt={iconUrl}
+            />
             {name}
           </h1>
           <table className="table">

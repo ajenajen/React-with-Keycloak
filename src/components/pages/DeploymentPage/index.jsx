@@ -22,7 +22,6 @@ export default function DeploymentPage() {
   const [appValues, setAppValues] = useState('');
   const [basicFormParameters, setBasicFormParameters] = useState([]);
   const [valuesModified, setValuesModified] = useState(false);
-  const [deployedValues, setDeployedValues] = useState('');
   const deploymentEvent = 'install';
 
   const {
@@ -139,7 +138,7 @@ export default function DeploymentPage() {
               <DifferentialForm
                 deploymentEvent={deploymentEvent}
                 defaultValues={defaultValues}
-                deployedValues={deployedValues || ''}
+                deployedValues={''} //{deployedValues || ''}
                 appValues={appValues}
                 setValuesModified={setValuesModifiedTrue}
               />

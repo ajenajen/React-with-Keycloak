@@ -1,20 +1,26 @@
 import Cookies from 'js-cookie';
-import { getAPI } from '../../services/APIService';
+import axios from 'axios';
 
-export const getProjects = async () => {
-  const token = Cookies.get('idToken');
-  const config = {
-    url: process.env.REACT_APP_API_IAM_PATH,
-    path: '/v1/projects',
-    token
+export const getUserProjects = async () => {
+  const idToken = Cookies.get('idToken');
+  const options = {
+    method: 'POST',
+    url: `${process.env.REACT_APP_IAM_URL}/get-user-accounts`,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`
+    },
+    data: { roles: ['g::_sys/tks-apps/user'] }
   };
 
-  const { data } = await getAPI(config).catch((e) => {
-    console.error(e);
+  return axios
+    .request(options)
+    .then(({ data }) => {
+      const result = data.data;
 
-    localStorage.setItem('errorMessage', 'System has a problem get projects');
-    // window.location = '/error';
-  });
-
-  return data;
+      return result || [];
+    })
+    .catch((e) => {
+      console.error('getUserProjects', e);
+    });
 };

@@ -1,34 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from 'stores/store';
 import { useNavigate } from 'react-router-dom';
-import { setSelectedStore } from '../../../../_redux/actions/storeActions';
-import { getProjects } from '../../../../modules/project/services';
+import { setSelectedStore } from 'stores/actions/storeActions';
+import { getUserProjects } from 'modules/project/services';
 
 export default function ProjectList() {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const [data, setData] = useState([]);
-  const { store } = useSelector((state) => state);
+  const { store } = useAppSelector((state) => state);
   const currentProject = store.project;
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data } = await getProjects();
-      if (data) {
+      const response = await getUserProjects();
+
+      if (response) {
         dispatch(
           setSelectedStore({
             project: {
-              name: currentProject?.name || data[0]?.projectName,
-              code: currentProject?.code || data[0]?.projectCode
+              name: currentProject?.name || response[0]?.projectName,
+              code: currentProject?.code || response[0]?.projectCode
             }
           })
         );
-        // set to localStorage
-        setData(data);
+        setData(response);
       }
     };
     fetchData();
-    // eslint-disable-next-line
-  }, [currentProject]);
+  }, [currentProject?.code, currentProject?.name, dispatch]);
 
   return (
     <>
@@ -40,7 +39,7 @@ export default function ProjectList() {
 }
 
 function ProjectListItem({ data }) {
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { projectCode, projectName } = data;
 
@@ -49,17 +48,17 @@ function ProjectListItem({ data }) {
     dispatch(
       setSelectedStore({ project: { name: projectName, code: projectCode } })
     );
-    navigate(`/${projectCode}/cluster`);
+    navigate(`/project/${projectCode}`);
     // eslint-disable-next-line
   }, []);
 
   return (
     <a
-      href="/"
+      href="/#"
       onClick={handleOnClick}
       style={{ display: 'block', padding: 10, color: '#999' }}
     >
-      {projectName}
+      {projectCode} : {projectName}
     </a>
   );
 }
