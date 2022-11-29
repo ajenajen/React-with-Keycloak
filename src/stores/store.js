@@ -1,7 +1,7 @@
-import { useDispatch, useSelector } from 'react-redux';
 import { applyMiddleware, createStore } from 'redux';
-import thunkMiddleware from 'redux-thunk';
+import { useDispatch, useSelector } from 'react-redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
+import thunkMiddleware from 'redux-thunk';
 import { rootReducer } from 'stores/reducers/_rootReducer';
 
 export function configureStore() {

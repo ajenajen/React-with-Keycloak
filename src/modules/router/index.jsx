@@ -2,10 +2,9 @@ import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from 'components/common/ProtectedRoute';
 
 import HomePage from 'components/pages/HomePage';
-import ReadMdPage from 'components/pages/ReadMdPage';
-import DeploymentPage from 'components/pages/DeploymentPage';
 import LogoutPage from 'components/pages/Auth/LogoutPage';
 import ErrorPage from 'components/pages/ErrorPage';
+import PrivatePage from 'components/pages/PrivatePage';
 
 const routes = {
   '/': <HomePage />,
@@ -15,8 +14,7 @@ const routes = {
 
 //:global === [global,local]
 const privateRoutes = {
-  '/project/deploy': <DeploymentPage />,
-  '/project/readme': <ReadMdPage />
+  '/private': <PrivatePage />
 };
 
 export default function Router() {

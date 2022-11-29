@@ -26,14 +26,9 @@ function NavBar({ isAuthenticated = false, currentPathname }) {
           Home
         </Link>
         {isAuthenticated && (
-          <>
-            <Link style={{ margin: 10 }} to="/project/readme">
-              Read .Md
-            </Link>
-            <Link style={{ margin: 10 }} to="/project/deploy">
-              Deployment
-            </Link>
-          </>
+          <Link style={{ margin: 10 }} to="/private">
+            Private route
+          </Link>
         )}
 
         <div

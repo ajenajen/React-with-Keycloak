@@ -4,7 +4,11 @@ import { useAuth } from 'modules/auth';
 function HomePage() {
   const { authenticated } = useAuth();
 
-  return <MainLayout>{authenticated && 'authenticated'}</MainLayout>;
+  return (
+    <MainLayout>
+      {authenticated ? 'authenticated' : 'please sign in'}
+    </MainLayout>
+  );
 }
 
 export default HomePage;
