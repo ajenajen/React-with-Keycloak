@@ -8,8 +8,10 @@ export const axiosWithToken = Axios.create();
 axiosWithToken.interceptors.request.use(async (config) => {
   const now = Math.floor(new Date(Date.now()).getTime() / 1000);
   try {
-    let idToken = AuthService.getIdToken();
+    const idToken = AuthService.getIdToken();
     const { expIdToken } = AuthService.getCookieExpire();
+
+    config.headers.authorization = `Bearer ${idToken}`;
 
     if (!idToken || now + timeRenew >= expIdToken) {
       console.log('renew idToken');
@@ -17,10 +19,8 @@ axiosWithToken.interceptors.request.use(async (config) => {
         await AuthService.updateAuthorizationToken({
           pathname: undefined
         });
-      idToken = idTokenRsp;
+      config.headers.authorization = `Bearer ${idTokenRsp}`;
     }
-
-    config.headers.authorization = `Bearer ${idToken}`;
 
     return config;
   } catch (e) {
