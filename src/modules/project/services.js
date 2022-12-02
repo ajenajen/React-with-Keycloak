@@ -1,19 +1,16 @@
-import Cookies from 'js-cookie';
-import axios from 'axios';
+import { axiosWithToken } from 'modules/auth/apiService';
 
 export const getUserProjects = async () => {
-  const idToken = Cookies.get('idToken');
   const options = {
     method: 'POST',
     url: `${process.env.REACT_APP_IAM_URL}/get-user-accounts`,
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`
+      'Content-Type': 'application/json'
     },
     data: { roles: ['g::_sys/tks-apps/user'] }
   };
 
-  return axios
+  return axiosWithToken
     .request(options)
     .then(({ data }) => {
       const result = data.data;

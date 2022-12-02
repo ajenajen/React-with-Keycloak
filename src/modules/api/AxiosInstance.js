@@ -1,34 +1,41 @@
 import Axios from 'axios';
-import { get, includes } from 'lodash';
 import * as AuthService from 'modules/auth/services';
 
 const AXIOS_TIME_OUT = 30000;
+const timeRenew = 60;
 
 export const axios = Axios.create();
 
 export function setAuthHeaders(axiosInstance) {
-  axiosInstance.interceptors.request.use((config) => {
-    if (config.method === 'get') {
-      config.timeout = AXIOS_TIME_OUT;
-    } else {
-      config.timeout = 0;
-    }
-
-    const url = get(config, `url`, '');
-    const idToken = AuthService.getIdToken();
-    const iamToken = AuthService.getIamToken();
-
-    setHeader();
-
-    function setHeader() {
-      if (includes(url, 'tks-apps-backend.dev.nxcp.trueidc')) {
-        config.headers['iamToken'] = iamToken;
+  axiosInstance.interceptors.request.use(async (config) => {
+    const now = Math.floor(new Date(Date.now()).getTime() / 1000);
+    try {
+      if (config.method === 'get') {
+        config.timeout = AXIOS_TIME_OUT;
+      } else {
+        config.timeout = 0;
       }
-      if (includes(url, 'tks-iam-authority')) {
-        config.headers.Authorization = `Bearer ${idToken}`;
-      }
-    }
 
-    return config;
+      let iamToken = AuthService.getIamToken();
+      const { expIamToken } = AuthService.getCookieExpire();
+      // const project = ConfigService.getLocalStoredConfig('selectProject');
+      const project = {
+        projectCode: 'IDC2021_trial03',
+        projectName: 'IDC2021 trial03'
+      };
+
+      if (now + timeRenew >= expIamToken) {
+        const { iamToken: iamTokenRsp } =
+          await AuthService.getIamTokenAuthentication({ project });
+
+        config.headers['iamToken'] = iamTokenRsp;
+      }
+      config.headers['iamToken'] = iamToken;
+
+      return config;
+    } catch (e) {
+      console.log('SetAuthHeaders error', e);
+      return config;
+    }
   });
 }

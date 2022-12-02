@@ -9,6 +9,7 @@ export async function getAPI({ url, params, options, headers }) {
 
   return data;
 }
+
 export async function postAPI({ url, params, options, body, headers }) {
   const { data } = await axios.post(url, body, {
     params,

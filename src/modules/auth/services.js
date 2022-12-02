@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import queryString from 'query-string';
 import jwt_decode from 'jwt-decode';
-import { axios } from 'modules/api/AxiosInstance';
+import { axios, axiosWithToken } from './apiService';
 
 import {
   ID_TOKEN_NAME,
@@ -91,9 +91,10 @@ export function doLogin({ currentPathname = '/' }) {
   window.location.href = `${authorizationUrl}${queryParam}`;
 }
 
-export function doLogout({ currentPathname = '/' }) {
+export function doLogout({ currentPathname }) {
+  const redirectPathname = currentPathname || window.location.pathname;
   const refreshToken = getRefreshToken();
-  const redirectURI = `?redirect_uri=${process.env.REACT_APP_REDIRECT_URL}${currentPathname}`;
+  const redirectURI = `?redirect_uri=${process.env.REACT_APP_REDIRECT_URL}${redirectPathname}`;
   const url = `${logoutUrl}${redirectURI}`;
 
   const data = {
@@ -115,7 +116,7 @@ export function doLogout({ currentPathname = '/' }) {
     axios(options)
       .then((response) => {
         clearAllCookies();
-        window.location.replace(currentPathname);
+        window.location.replace(redirectPathname);
 
         return response;
       })
@@ -125,7 +126,7 @@ export function doLogout({ currentPathname = '/' }) {
       });
   } else {
     clearAllCookies();
-    window.location.replace(currentPathname);
+    window.location.replace(redirectPathname);
   }
 }
 
@@ -178,7 +179,7 @@ export function getIamTokenAuthentication({ project }) {
     data: { domain: `${project?.projectCode}/th`, scope: ['tks-apps'] }
   };
 
-  return axios
+  return axiosWithToken
     .request(options)
     .then(({ data }) => {
       console.log('getIamTokenAuthentication', data);
@@ -192,7 +193,7 @@ export function getIamTokenAuthentication({ project }) {
     });
 }
 
-function getCookieExpire() {
+export function getCookieExpire() {
   const idToken = getIdToken();
   const iamToken = getIamToken();
   const expIdToken = idToken && jwt_decode(idToken).exp;
@@ -203,15 +204,12 @@ function getCookieExpire() {
   };
 }
 
-const TIME_RENEW = 60 * 3;
-
 export async function checkCookieAuthentication({ pathname, selectProject }) {
   const refreshToken = getRefreshToken();
   const idToken = getIdToken();
-  const { expIdToken, expIamToken } = getCookieExpire();
+  const { expIdToken } = getCookieExpire();
 
   let isCookieAuthentication = false;
-  const timeRenew = TIME_RENEW;
   const now = Math.floor(new Date(Date.now()).getTime() / 1000);
   const noTokenCookies = idToken === undefined || refreshToken === undefined;
 
@@ -224,19 +222,6 @@ export async function checkCookieAuthentication({ pathname, selectProject }) {
       if (now > expIdToken) {
         isCookieAuthentication = false;
         doLogout({ currentPathname: pathname });
-      } else if (now + timeRenew >= expIdToken) {
-        const { id_token: idTokenRsp } = await updateAuthorizationToken({
-          pathname
-        });
-        const { iamToken: iamTokenRsp } = await getIamTokenAuthentication({
-          project: selectProject
-        });
-        isCookieAuthentication = idTokenRsp && iamTokenRsp ? true : false;
-      } else if (now + timeRenew >= expIamToken) {
-        const { iamToken: iamTokenRsp } = await getIamTokenAuthentication({
-          project: selectProject
-        });
-        isCookieAuthentication = iamTokenRsp ? true : false;
       }
 
       isCookieAuthentication = true;

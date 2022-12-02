@@ -29,12 +29,9 @@ export const fetchAuthenToken =
   };
 
 export const checkAuthenToken =
-  ({ selectProject, pathname }) =>
+  ({ pathname }) =>
   async (dispatch, getState) => {
-    checkCookieAuthentication({
-      selectProject,
-      pathname
-    })
+    checkCookieAuthentication({ pathname })
       .then((response) => {
         if (getState.fetchAuthenFirstime) {
           dispatch(setFetchingFirsttime(false));

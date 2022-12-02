@@ -33,7 +33,7 @@ export function useCallbackKeyCloak(pathname) {
   }, [code, dispatch, isRedirectFromKeyCloak, pathname]);
 }
 
-export function useFetchIamToken({ pathname, selected }) {
+export function useFetchIamToken() {
   const {
     auth: { authenticated }
   } = useAppSelector((state) => state);
@@ -42,12 +42,12 @@ export function useFetchIamToken({ pathname, selected }) {
   const iamToken = AuthService.getIamToken();
 
   useEffect(() => {
-    if (authenticated && !isEmpty(selected) && idToken && !iamToken) {
+    if (authenticated && !isEmpty(selectProject) && idToken && !iamToken) {
       AuthService.getIamTokenAuthentication({
-        project: selected
+        project: selectProject
       }).then(() => dispatch(setIamTokenReady(true)));
     }
-  }, [authenticated, dispatch, iamToken, idToken, selected]);
+  }, [authenticated, idToken, iamToken, dispatch]);
 
   useEffect(() => {
     if (authenticated && iamToken) {
@@ -67,12 +67,12 @@ export function useAuthentication() {
   // support redirect from keycloak
   useCallbackKeyCloak(pathname);
 
-  useFetchIamToken({ pathname, selected: selectProject });
+  useFetchIamToken();
 
-  useCheckAuthentication({ selected: selectProject });
+  useCheckAuthentication();
 }
 
-export function useCheckAuthentication({ selected }) {
+export function useCheckAuthentication() {
   const [windowOnFocus, setWindowOnFocus] = useState(true);
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
@@ -90,9 +90,8 @@ export function useCheckAuthentication({ selected }) {
   }, [windowOnFocus]);
 
   useEffect(() => {
-    windowOnFocus &&
-      dispatch(checkAuthenToken({ pathname, selectProject: selected }));
-  }, [windowOnFocus, pathname, dispatch, selected]);
+    windowOnFocus && dispatch(checkAuthenToken({ pathname }));
+  }, [windowOnFocus, pathname, dispatch]);
 }
 
 export function useAuth() {
