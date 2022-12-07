@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import _ from 'lodash';
 import * as AuthService from 'modules/auth/services';
 
 const AXIOS_TIME_OUT = 30000;
@@ -8,7 +9,17 @@ const project = {
   projectName: 'IDC2021 trial03'
 };
 
-export const axios = Axios.create();
+function setHeader(config, idToken, iamToken) {
+  const url = _.get(config, `url`, '');
+
+  if (_.includes(url, process.env.REACT_APP_IAM_URL)) {
+    config.headers.authorization = `Bearer ${idToken}`;
+  } else {
+    config.headers['iamToken'] = iamToken;
+  }
+
+  return config;
+}
 
 export function setAuthHeaders(axiosInstance) {
   axiosInstance.interceptors.request.use(async (config) => {
@@ -20,19 +31,29 @@ export function setAuthHeaders(axiosInstance) {
         config.timeout = 0;
       }
 
-      const iamToken = AuthService.getIamToken();
-      const { expIamToken } = AuthService.getCookieExpire();
+      let idToken = AuthService.getIdToken();
+      let iamToken = AuthService.getIamToken();
       // const project = ConfigService.getLocalStoredConfig('selectProject');
+      const { expIdToken, expIamToken } = AuthService.getCookieExpire();
 
-      config.headers['iamToken'] = iamToken;
-
-      if (now + timeRenew >= expIamToken) {
-        const { iamToken: iamTokenRsp } =
-          await AuthService.getIamTokenAuthentication({ project });
-
-        config.headers['iamToken'] = iamTokenRsp;
+      if (now + timeRenew >= expIdToken || now + timeRenew >= expIamToken) {
+        AuthService.updateAuthorizationToken({
+          pathname: undefined
+        }).then(({ id_token }) => {
+          console.count('Renew token');
+          AuthService.getIamTokenAuthentication({
+            project,
+            headers: {
+              authorization: `Bearer ${id_token}`
+            }
+          }).then(({ iamToken: iamTokenRsp }) => {
+            idToken = id_token;
+            iamToken = iamTokenRsp;
+          });
+        });
       }
 
+      setHeader(config, idToken, iamToken);
       return config;
     } catch (e) {
       console.log('SetAuthHeaders error', e);
@@ -74,3 +95,6 @@ export function setAuthHeaders(axiosInstance) {
     }
   );
 }
+
+export const axios = Axios.create();
+export const axiosWithAuth = Axios.create();

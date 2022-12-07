@@ -1,4 +1,4 @@
-import { axiosWithToken } from 'modules/auth/apiService';
+import { axiosWithAuth } from 'modules/api/AxiosInstance';
 
 export const getUserProjects = async () => {
   const options = {
@@ -10,7 +10,7 @@ export const getUserProjects = async () => {
     data: { roles: ['g::_sys/tks-apps/user'] }
   };
 
-  return axiosWithToken
+  return axiosWithAuth
     .request(options)
     .then(({ data }) => {
       const result = data.data;

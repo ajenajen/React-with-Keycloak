@@ -1,7 +1,7 @@
 import Cookies from 'js-cookie';
 import queryString from 'query-string';
 import jwt_decode from 'jwt-decode';
-import { axios, axiosWithToken } from './apiService';
+import { axios, axiosWithAuth } from 'modules/api/AxiosInstance';
 
 import {
   ID_TOKEN_NAME,
@@ -179,7 +179,7 @@ export function getIamTokenAuthentication({ project }) {
     data: { domain: `${project?.projectCode}/th`, scope: ['tks-apps'] }
   };
 
-  return axiosWithToken
+  return axiosWithAuth
     .request(options)
     .then(({ data }) => {
       console.log('getIamTokenAuthentication', data);
