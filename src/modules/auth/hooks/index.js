@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from 'stores/store';
 
 import {
@@ -38,16 +38,19 @@ export function useFetchIamToken() {
     auth: { authenticated }
   } = useAppSelector((state) => state);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const idToken = AuthService.getIdToken();
   const iamToken = AuthService.getIamToken();
 
   useEffect(() => {
-    if (authenticated && !isEmpty(selectProject) && idToken && !iamToken) {
-      AuthService.getIamTokenAuthentication({
-        project: selectProject
-      }).then(() => dispatch(setIamTokenReady(true)));
+    if (authenticated && idToken && !iamToken) {
+      !isEmpty(selectProject)
+        ? AuthService.getIamTokenAuthentication({
+            project: selectProject
+          }).then(() => dispatch(setIamTokenReady(true)))
+        : navigate('/projects');
     }
-  }, [authenticated, idToken, iamToken, dispatch]);
+  }, [authenticated, idToken, iamToken, navigate, dispatch]);
 
   useEffect(() => {
     iamToken
