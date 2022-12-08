@@ -1,5 +1,6 @@
 import Axios from 'axios';
 import _ from 'lodash';
+import { Mutex } from 'async-mutex';
 import * as AuthService from 'modules/auth/services';
 
 const AXIOS_TIME_OUT = 30000;
@@ -22,6 +23,7 @@ function setHeader(config, idToken, iamToken) {
 }
 
 export function setAuthHeaders(axiosInstance) {
+  let clientLock = new Mutex();
   axiosInstance.interceptors.request.use(async (config) => {
     const now = Math.floor(new Date(Date.now()).getTime() / 1000);
     try {
@@ -36,6 +38,7 @@ export function setAuthHeaders(axiosInstance) {
       // const project = ConfigService.getLocalStoredConfig('selectProject');
       const { expIdToken, expIamToken } = AuthService.getCookieExpire();
 
+      let release = await clientLock.acquire();
       if (now + timeRenew >= expIdToken || now + timeRenew >= expIamToken) {
         AuthService.updateAuthorizationToken({
           pathname: undefined
@@ -52,14 +55,16 @@ export function setAuthHeaders(axiosInstance) {
           });
         });
       }
-
+      release();
       setHeader(config, idToken, iamToken);
+
       return config;
     } catch (e) {
       console.log('SetAuthHeaders error', e);
       return config;
     }
   });
+
   axiosInstance.interceptors.response.use(
     (res) => {
       return res;

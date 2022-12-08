@@ -50,10 +50,10 @@ export function useFetchIamToken() {
   }, [authenticated, idToken, iamToken, dispatch]);
 
   useEffect(() => {
-    if (authenticated && iamToken) {
-      dispatch(setIamTokenReady(true));
-    }
-  }, [authenticated, iamToken, dispatch]);
+    iamToken
+      ? dispatch(setIamTokenReady(true))
+      : dispatch(setIamTokenReady(false));
+  }, [iamToken, dispatch]);
 }
 
 export function useAuthentication() {
