@@ -3,8 +3,8 @@ import _ from 'lodash';
 import { Mutex } from 'async-mutex';
 import * as AuthService from 'modules/auth/services';
 
-const AXIOS_TIME_OUT = 30000;
-const timeRenew = 60;
+const AXIOS_TIME_OUT = AuthService.AXIOS_TIME_OUT;
+const TIME_RENEW = AuthService.TIME_RENEW;
 const project = {
   projectCode: 'IDC2021_trial03',
   projectName: 'IDC2021 trial03'
@@ -25,7 +25,7 @@ function setHeader(config, idToken, iamToken) {
 export function setAuthHeaders(axiosInstance) {
   let clientLock = new Mutex();
   axiosInstance.interceptors.request.use(async (config) => {
-    const now = Math.floor(new Date(Date.now()).getTime() / 1000);
+    const TIME_NOW = Math.floor(new Date(Date.now()).getTime() / 1000);
     try {
       if (config.method === 'get') {
         config.timeout = AXIOS_TIME_OUT;
@@ -39,7 +39,7 @@ export function setAuthHeaders(axiosInstance) {
       const { expIdToken, expIamToken } = AuthService.getCookieExpire();
 
       let release = await clientLock.acquire();
-      if (now + timeRenew >= expIdToken) {
+      if (TIME_NOW + TIME_RENEW >= expIdToken) {
         AuthService.updateAuthorizationToken({
           pathname: undefined
         }).then(({ id_token }) => {
@@ -54,7 +54,7 @@ export function setAuthHeaders(axiosInstance) {
             iamToken = iamTokenRsp;
           });
         });
-      } else if (now + timeRenew >= expIamToken) {
+      } else if (TIME_NOW + TIME_RENEW >= expIamToken) {
         AuthService.removeIamToken();
         AuthService.getIamTokenAuthentication({
           project,

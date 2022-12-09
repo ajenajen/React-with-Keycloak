@@ -20,6 +20,9 @@ const CookiesWithDomain = Cookies.withAttributes({
   httpOnly: false
 });
 
+export const AXIOS_TIME_OUT = 30000;
+export const TIME_RENEW = 60;
+
 export function setAccessToken(token) {
   CookiesWithDomain.set(ACCESS_TOKEN_NAME, token);
 }

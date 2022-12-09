@@ -41,19 +41,30 @@ export function useFetchIamToken() {
   const idToken = AuthService.getIdToken();
   const iamToken = AuthService.getIamToken();
 
+  const TIME_NOW = Math.floor(new Date(Date.now()).getTime() / 1000);
+  const TIME_RENEW = AuthService.TIME_RENEW;
+  const { expIamToken } = AuthService.getCookieExpire();
+  const isExpIamToken = TIME_NOW + TIME_RENEW >= expIamToken;
+  const isIamTokenReady = !!iamToken && !isExpIamToken;
+
   useEffect(() => {
-    if (authenticated && !isEmpty(selectProject) && idToken && !iamToken) {
+    if (
+      authenticated &&
+      !isEmpty(selectProject) &&
+      idToken &&
+      !isIamTokenReady
+    ) {
       AuthService.getIamTokenAuthentication({
         project: selectProject
       }).then(() => dispatch(setIamTokenReady(true)));
     }
-  }, [authenticated, idToken, iamToken, dispatch]);
+  }, [authenticated, idToken, isIamTokenReady, dispatch]);
 
   useEffect(() => {
-    iamToken
+    isIamTokenReady
       ? dispatch(setIamTokenReady(true))
       : dispatch(setIamTokenReady(false));
-  }, [iamToken, dispatch]);
+  }, [isIamTokenReady, dispatch]);
 }
 
 export function useAuthentication() {
