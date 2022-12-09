@@ -39,11 +39,11 @@ export function setAuthHeaders(axiosInstance) {
       const { expIdToken, expIamToken } = AuthService.getCookieExpire();
 
       let release = await clientLock.acquire();
-      if (now + timeRenew >= expIdToken || now + timeRenew >= expIamToken) {
+      if (now + timeRenew >= expIdToken) {
         AuthService.updateAuthorizationToken({
           pathname: undefined
         }).then(({ id_token }) => {
-          console.count('Renew token');
+          AuthService.removeIamToken();
           AuthService.getIamTokenAuthentication({
             project,
             headers: {
@@ -53,6 +53,16 @@ export function setAuthHeaders(axiosInstance) {
             idToken = id_token;
             iamToken = iamTokenRsp;
           });
+        });
+      } else if (now + timeRenew >= expIamToken) {
+        AuthService.removeIamToken();
+        AuthService.getIamTokenAuthentication({
+          project,
+          headers: {
+            authorization: `Bearer ${idToken}`
+          }
+        }).then(({ iamToken: iamTokenRsp }) => {
+          iamToken = iamTokenRsp;
         });
       }
       release();
