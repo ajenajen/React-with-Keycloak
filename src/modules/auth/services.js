@@ -94,44 +94,52 @@ export function doLogin({ currentPathname = '/' }) {
   window.location.href = `${authorizationUrl}${queryParam}`;
 }
 
-export function doLogout({ currentPathname }) {
+export function doLogout({ currentPathname = '/' }) {
   const redirectPathname = currentPathname || window.location.pathname;
-  const refreshToken = getRefreshToken();
-  const redirectURI = `?redirect_uri=${process.env.REACT_APP_REDIRECT_URL}${redirectPathname}`;
-  const url = `${logoutUrl}${redirectURI}`;
+  const redirectURI = `?redirect_uri=${window._env_.REACT_APP_URL}${redirectPathname}`;
 
-  const data = {
-    client_id: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
-    client_secret: process.env.REACT_APP_KEYCLOAK_CLIENT_SECRET,
-    refresh_token: refreshToken
-  };
-
-  const options = {
-    method: 'POST',
-    url,
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    data: queryString.stringify(data)
-  };
-
-  if (refreshToken) {
-    axios(options)
-      .then((response) => {
-        clearAllCookies();
-        window.location.replace(redirectPathname);
-
-        return response;
-      })
-      .catch((e) => {
-        clearAllCookies();
-        console.error(e);
-      });
-  } else {
-    clearAllCookies();
-    window.location.replace(redirectPathname);
-  }
+  clearAllCookies();
+  window.location.href = `${logoutUrl}${redirectURI}`;
 }
+
+// export function doLogout({ currentPathname }) {
+//   const redirectPathname = currentPathname || window.location.pathname;
+//   const refreshToken = getRefreshToken();
+//   const redirectURI = `?redirect_uri=${process.env.REACT_APP_REDIRECT_URL}${redirectPathname}`;
+//   const url = `${logoutUrl}${redirectURI}`;
+
+//   const data = {
+//     client_id: process.env.REACT_APP_KEYCLOAK_CLIENT_ID,
+//     client_secret: process.env.REACT_APP_KEYCLOAK_CLIENT_SECRET,
+//     refresh_token: refreshToken
+//   };
+
+//   const options = {
+//     method: 'POST',
+//     url,
+//     headers: {
+//       'Content-Type': 'application/x-www-form-urlencoded'
+//     },
+//     data: queryString.stringify(data)
+//   };
+
+//   if (refreshToken) {
+//     axios(options)
+//       .then((response) => {
+//         clearAllCookies();
+//         window.location.replace(redirectPathname);
+
+//         return response;
+//       })
+//       .catch((e) => {
+//         clearAllCookies();
+//         console.error(e);
+//       });
+//   } else {
+//     clearAllCookies();
+//     window.location.replace(redirectPathname);
+//   }
+// }
 
 export function handleAuthenticationCallback({ code, pathname }) {
   return accessTokenAuthentication({ code, pathname });
